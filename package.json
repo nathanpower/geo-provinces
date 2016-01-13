@@ -1,0 +1,16 @@
+{
+  "name": "geo-provinces",
+  "version": "1.0.0",
+  "description": "Generate county, province or state data for given countries",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "nathan power",
+  "license": "MIT",
+  "dependencies": {
+    "async": "^1.5.2",
+    "lodash": "^4.0.0",
+    "request": "^2.67.0"
+  }
+}
