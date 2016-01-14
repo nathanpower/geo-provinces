@@ -1,9 +1,16 @@
 var request = require('request'),
     async = require('async'),
     _ = require('lodash'),
-    fs = require('fs');
-
-var countryISOCodes = ['IT', 'AT', 'CH', 'ES', 'FR', 'DE', 'AR', 'GP', 'GY', 'MC', 'MQ', 'RE', 'SM', 'AD', 'GI'];
+    fs = require('fs'),
+	fileISOCodes=fs.readFileSync("\isoCodes.txt", 'utf8', function (err,data) {
+	console.log(data);
+	  if (err) {
+		return err;
+	  }
+		return console.log(data);
+	});
+	
+var countryISOCodes=fileISOCodes.split(', ');
 var countryFunctions = [];
 countryISOCodes.map(function (isoCode) {
     countryFunctions.push(function (cb) {
