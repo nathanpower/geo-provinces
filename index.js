@@ -27,8 +27,8 @@ countryISOCodes.map(function (isoCode) {
 
 async.series(countryFunctions, function (err, countryGeonameIds) {
     var provinceFunctions = [];
-    _.forEach(countryGeonameIds, function (countryObj) {
-        provinceFunctions.push(function (cb) {
+    countryGeonameIds.map(function(countryObj,i,e){
+	    provinceFunctions.push(function (cb) {
             request('http://api.geonames.org/children?geonameId=' + countryObj.id + '&username=nathanpower&type=json&lang=' + countryObj.iso, function (error, response, body) {
                 if (!error && response.statusCode == 200) {
                     var result = JSON.parse(body);
@@ -37,18 +37,15 @@ async.series(countryFunctions, function (err, countryGeonameIds) {
             });
         });
     });
-    async.series(provinceFunctions, function (err, countryProvinces) {
-        var countryProvinceData = countryProvinces.reduce(function (prevObj, provinces) {
-            prevObj[provinces[0].countryCode] = [];
-            _.forEach(provinces, function (province) {
-                prevObj[provinces[0].countryCode].push(province.toponymName);
-            });
-            return prevObj;
-        }, {});
-        fs.writeFile('./provinces.json', JSON.stringify(countryProvinceData, null, 2), 'utf-8');
-        console.log('finished!');
+	async.series(provinceFunctions, function (err, countryProvinces) {
+		var countryProvinceData = countryProvinces.map(function(o,i,e){
+					return JSON.stringify(o[i].countryCode)+':['+o.map(function(o,i,e){
+						return JSON.stringify(o.toponymName);
+					})+'],';
+				});					
+				fs.writeFile('provinces.json', '{'+countryProvinceData.join('')+'}', 'utf-8');	
+		});		
     });
-});
+	
 
-
-
+	
