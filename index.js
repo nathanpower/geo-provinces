@@ -3,11 +3,9 @@ var request = require('request'),
     _ = require('lodash'),
     fs = require('fs'),
 	fileISOCodes=fs.readFileSync("\isoCodes.txt", 'utf8', function (err,data) {
-	console.log(data);
 	  if (err) {
 		return err;
-	  }
-		return console.log(data);
+	  }		
 	});
 	
 var countryISOCodes=fileISOCodes.split(', ');
@@ -15,8 +13,10 @@ var countryFunctions = [];
 countryISOCodes.map(function (isoCode) {
     countryFunctions.push(function (cb) {
         return request('http://api.geonames.org/countryInfo?username=nathanpower&country=' + isoCode + '&type=json', function (error, response, body) {
+			
             var result = JSON.parse(body);
             if (!error && response.statusCode == 200 && result.geonames[0]) {
+				//console.log('Invoking cb...',result);
                 cb(null, {"id": result.geonames[0].geonameId, "iso": isoCode});
             } else {
                 throw new Error('Invalid response for ISO code ' + isoCode);
@@ -37,18 +37,13 @@ async.series(countryFunctions, function (err, countryGeonameIds) {
             });
         });
     });
-    async.series(provinceFunctions, function (err, countryProvinces) {
-        var countryProvinceData = countryProvinces.reduce(function (prevObj, provinces) {
-            prevObj[provinces[0].countryCode] = [];
-            _.forEach(provinces, function (province) {
-                prevObj[provinces[0].countryCode].push(province.toponymName);
-            });
-            return prevObj;
-        }, {});
-        fs.writeFile('./provinces.json', JSON.stringify(countryProvinceData, null, 2), 'utf-8');
-        console.log('finished!');
+   async.series(provinceFunctions, function (err, countryProvinces) {
+			var countryProvinceData = countryProvinces.map(function(o,i,e){
+					return o[i].countryCode+':['+o.map(function(o,i,e){
+						return o.toponymName;
+					})+']';
+				});		
+				var parsed=JSON.parse('"{'+countryProvinceData.toString()+'}"');				
+				fs.writeFile('provinces.json', parsed, 'utf-8');									
+        });		
     });
-});
-
-
-
