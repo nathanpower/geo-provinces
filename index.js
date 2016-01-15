@@ -39,11 +39,13 @@ async.series(countryFunctions, function (err, countryGeonameIds) {
     });
 	async.series(provinceFunctions, function (err, countryProvinces) {
 		var countryProvinceData = countryProvinces.map(function(o,i,e){
-					return o[i].countryCode+':['+o.map(function(o,i,e){
-						return o.toponymName;
-					})+']';
-				});		
-				var parsed=JSON.parse('"{'+countryProvinceData.toString()+'}"');				
-				fs.writeFile('provinces.json', parsed, 'utf-8');									
-        });		
+					return JSON.stringify(o[i].countryCode)+':['+o.map(function(o,i,e){
+						return JSON.stringify(o.toponymName);
+					})+'],';
+				});					
+				fs.writeFile('provinces.json', '{'+countryProvinceData.join('')+'}', 'utf-8');	
+		});		
     });
+	
+
+	
